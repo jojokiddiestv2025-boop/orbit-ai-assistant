@@ -51,11 +51,14 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [listening, setListening] = useState(false);
+  const [voiceActive, setVoiceActive] = useState(false);
   const [connection, setConnection] = useState('Checking models…');
   const inputRef = useRef(null);
   const fileRef = useRef(null);
   const conversationRef = useRef(null);
   const recognitionRef = useRef(null);
+  const voiceActiveRef = useRef(false);
+  const voiceStateRef = useRef('off');
   const toastTimer = useRef(null);
 
   useEffect(() => {
@@ -118,10 +121,13 @@ export default function App() {
     setSidebarOpen(false);
   }
 
-  function speak(text) {
-    if (!window.speechSynthesis) return notify('Speech playback is not supported in this browser.');
+  function speak(text, onEnd) {
+    if (!window.speechSynthesis) { notify('Speech playback is not supported in this browser.'); onEnd?.(); return; }
     window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onend = onEnd;
+    utterance.onerror = onEnd;
+    window.speechSynthesis.speak(utterance);
   }
 
   async function pickImage(file) {
@@ -172,21 +178,31 @@ export default function App() {
       const completed = [...nextMessages, { role: 'assistant', content: data.answer }];
       setMessages(completed);
       storeChat(completed);
-      if (fromVoice) speak(data.answer);
+      if (fromVoice && voiceActiveRef.current) {
+        voiceStateRef.current = 'speaking';
+        speak(data.answer, () => {
+          if (!voiceActiveRef.current) return;
+          voiceStateRef.current = 'listening';
+          startListening();
+        });
+      }
     } catch (error) {
       setMessages(messages);
       if (image) setAttachment(image);
       notify(error.message);
+      if (fromVoice && voiceActiveRef.current) {
+        voiceStateRef.current = 'listening';
+        setTimeout(startListening, 400);
+      }
     } finally {
       setBusy(false);
       inputRef.current?.focus();
     }
   }
 
-  function beginVoice() {
+  function startListening() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return notify('Voice input needs Chrome or Edge; you can type instead.');
-    if (recognitionRef.current) { recognitionRef.current.stop(); return; }
+    if (!voiceActiveRef.current || !SpeechRecognition || recognitionRef.current) return;
     const recognition = new SpeechRecognition();
     recognitionRef.current = recognition;
     recognition.lang = navigator.language || 'en-US';
@@ -194,14 +210,41 @@ export default function App() {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setListening(false);
-      recognitionRef.current = null;
+      voiceStateRef.current = 'thinking';
       sendMessage(transcript, true);
     };
-    recognition.onerror = (event) => notify(event.error === 'not-allowed' ? 'Allow microphone access to use voice.' : 'Could not hear that. Try again.');
-    recognition.onend = () => { recognitionRef.current = null; setListening(false); };
+    recognition.onerror = (event) => {
+      notify(event.error === 'not-allowed' ? 'Allow microphone access to use voice.' : 'Could not hear that. Try again.');
+      if (event.error === 'not-allowed') { voiceActiveRef.current = false; voiceStateRef.current = 'off'; setVoiceActive(false); }
+    };
+    recognition.onend = () => {
+      recognitionRef.current = null;
+      setListening(false);
+      if (voiceActiveRef.current && voiceStateRef.current === 'listening') setTimeout(startListening, 350);
+    };
     setListening(true);
-    notify('Listening… go ahead.');
+    voiceStateRef.current = 'listening';
     recognition.start();
+  }
+
+  function beginVoice() {
+    if (voiceActiveRef.current) {
+      voiceActiveRef.current = false;
+      voiceStateRef.current = 'off';
+      setVoiceActive(false);
+      setListening(false);
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+      window.speechSynthesis?.cancel();
+      notify('Live voice ended.');
+      return;
+    }
+    if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) return notify('Voice input needs Chrome or Edge; you can type instead.');
+    voiceActiveRef.current = true;
+    voiceStateRef.current = 'listening';
+    setVoiceActive(true);
+    startListening();
+    notify('Live voice is on. Speak naturally; tap the mic to end.');
   }
 
   async function copyText(text) {
@@ -243,7 +286,7 @@ export default function App() {
           {attachment && <div className="attachment-preview"><img src={attachment.data} alt="Selected image" /><span>{attachment.name}</span><button type="button" onClick={() => setAttachment(null)} title="Remove image">×</button></div>}
           <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(event) => pickImage(event.target.files[0])} />
           <textarea ref={inputRef} rows="1" placeholder="Ask anything" value={prompt} onChange={(event) => { setPrompt(event.target.value); event.target.style.height = 'auto'; event.target.style.height = `${Math.min(event.target.scrollHeight, 150)}px`; }} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }} />
-          <div className="composer-tools"><div><button className="tool-btn" onClick={() => fileRef.current?.click()} title="Add an image" aria-label="Add an image">＋</button><button className="mode-btn" onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}><i /><span>{mode === 'chat' ? 'Chat' : 'Mine AI Voice'}</span>⌄</button></div><div className="composer-right"><span>Mine AI Voice</span><button className={`voice-btn ${listening ? 'listening' : ''}`} onClick={beginVoice} title="Talk to Mine AI" aria-label="Talk to Mine AI"><MicIcon /></button><button className="send-btn" onClick={() => sendMessage()} aria-label="Send" disabled={busy}><SendIcon /></button></div></div>
+          <div className="composer-tools"><div><button className="tool-btn" onClick={() => fileRef.current?.click()} title="Add an image" aria-label="Add an image">＋</button><button className="mode-btn" onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}><i /><span>{mode === 'chat' ? 'Chat' : 'Mine AI Voice'}</span>⌄</button></div><div className="composer-right"><span>{voiceActive ? (listening ? 'Listening…' : busy ? 'Thinking…' : 'Speaking…') : 'Mine AI Voice'}</span><button className={`voice-btn ${voiceActive ? 'listening' : ''}`} onClick={beginVoice} title={voiceActive ? 'End live voice conversation' : 'Start live voice conversation'} aria-label={voiceActive ? 'End live voice conversation' : 'Start live voice conversation'}><MicIcon /></button><button className="send-btn" onClick={() => sendMessage()} aria-label="Send" disabled={busy}><SendIcon /></button></div></div>
         </div><div className="disclaimer">Mine AI 1.0 · Created by Joshua Fred · Powered by Google Gemini Voice and Groq (OpenAI model). Can make mistakes; check important information.</div></div>
       </main>
       {toast && <div className="toast" role="status">{toast}</div>}
