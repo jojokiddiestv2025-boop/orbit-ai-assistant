@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { configStatus, handleApi } from './lib/api.js';
 
 const root=fileURLToPath(new URL('.',import.meta.url));
-const staticRoot=join(root,'public');
+const staticRoot=join(root,'dist');
 const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8'};
 try{for(const line of (await readFile(join(root,'.env'),'utf8')).split(/\r?\n/)){const m=line.match(/^\s*([\w]+)\s*=\s*(.*?)\s*$/);if(m&&!process.env[m[1]])process.env[m[1]]=m[2].replace(/^['"]|['"]$/g,'')}}catch{}
 const send=(res,status,data)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(data))};
@@ -20,9 +20,9 @@ async function main(req,res){
     catch(e){return send(res,e.status||400,{error:e.message||'Something went wrong.'})}
   }
   if(req.method==='GET'){
-    const path=url.pathname==='/'?'index.html':url.pathname.slice(1);
-    if(!['index.html','styles.css','app.js'].includes(path)){res.writeHead(404);return res.end('Not found')}
-    try{const data=await readFile(join(staticRoot,path));res.writeHead(200,{'content-type':mime[extname(path)]});return res.end(data)}
+    const path=decodeURIComponent(url.pathname.slice(1));
+    if(path.split(/[\\/]/).includes('..')){res.writeHead(400);return res.end('Bad path')}
+    try{const data=await readFile(join(staticRoot,path||'index.html'));res.writeHead(200,{'content-type':mime[extname(path)]||'application/octet-stream'});return res.end(data)}
     catch{res.writeHead(404);return res.end('Not found')}
   }
   return send(res,404,{error:'Not found'});
