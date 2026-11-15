@@ -17,4 +17,13 @@ Image analysis is available from the plus button in the composer and uses Groq's
 
 4. Run `npm start` and open `http://localhost:3000`.
 
-The keys are only read by the local server. Voice input requires a browser with the Web Speech API (Chrome and Edge support it); microphone permission may be required. Images are resized in the browser before being sent to Groq. Conversations are stored in the current browser's local storage.
+The keys are read only by server-side code. Voice input requires a browser with the Web Speech API (Chrome and Edge support it); microphone permission may be required. Images are resized in the browser before being sent to Groq. Conversations are stored in the current browser's local storage.
+
+## Deploy to Vercel
+
+1. Import the [public GitHub repository](https://github.com/jojokiddiestv2025-boop/orbit-ai-assistant) in Vercel.
+2. In the Vercel project settings, add `GROQ_API_KEY` and `GEMINI_API_KEY` under **Environment Variables** for Production (and Preview if wanted).
+3. Deploy. Vercel serves the frontend from `public/` and the `/api` handlers as Node.js Functions. No build command is needed.
+4. Redeploy after changing environment variables so the new values are applied.
+
+For local Vercel emulation, install the Vercel CLI and run `vercel dev` from the project directory after setting the same environment variables.
