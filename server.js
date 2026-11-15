@@ -41,4 +41,4 @@ async function main(req,res){
   return send(res,404,{error:'Not found'});
 }
 const port=Number(process.env.PORT||env.PORT||3000);
-http.createServer((req,res)=>main(req,res)).listen(port,()=>console.log('Orbit ready at http://localhost:'+port));
+http.createServer((req,res)=>main(req,res)).listen(port,()=>console.log('Mine AI ready at http://localhost:'+port));

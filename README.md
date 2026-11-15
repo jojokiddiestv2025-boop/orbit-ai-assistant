@@ -1,6 +1,6 @@
-# Orbit
+# Mine AI
 
-A small, Gemini inspired AI chat and voice assistant. Chat messages use Groq; voice turns use Gemini for the response, with browser speech recognition and speech synthesis for the microphone and spoken reply.
+Mine AI is a Gemini inspired AI chat and voice assistant. Chat messages use Groq; voice turns use Gemini for the response, with browser speech recognition and speech synthesis for the microphone and spoken reply.
 
 Image analysis is available from the plus button in the composer and uses Groq's `qwen/qwen3.8-27b` vision model. Upload a PNG, JPG, or WebP image and include a question, or leave the prompt blank for a general description.
 
