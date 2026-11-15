@@ -244,7 +244,7 @@ export default function App() {
           <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(event) => pickImage(event.target.files[0])} />
           <textarea ref={inputRef} rows="1" placeholder="Ask anything" value={prompt} onChange={(event) => { setPrompt(event.target.value); event.target.style.height = 'auto'; event.target.style.height = `${Math.min(event.target.scrollHeight, 150)}px`; }} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }} />
           <div className="composer-tools"><div><button className="tool-btn" onClick={() => fileRef.current?.click()} title="Add an image" aria-label="Add an image">＋</button><button className="mode-btn" onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}><i /><span>{mode === 'chat' ? 'Chat' : 'Mine AI Voice'}</span>⌄</button></div><div className="composer-right"><span>Mine AI Voice</span><button className={`voice-btn ${listening ? 'listening' : ''}`} onClick={beginVoice} title="Talk to Mine AI" aria-label="Talk to Mine AI"><MicIcon /></button><button className="send-btn" onClick={() => sendMessage()} aria-label="Send" disabled={busy}><SendIcon /></button></div></div>
-        </div><div className="disclaimer">Mine AI 1.0 · Created by Joshua Fred · Can make mistakes; check important information.</div></div>
+        </div><div className="disclaimer">Mine AI 1.0 · Created by Joshua Fred · Powered by Google Gemini Voice and Groq (OpenAI model). Can make mistakes; check important information.</div></div>
       </main>
       {toast && <div className="toast" role="status">{toast}</div>}
     </div>

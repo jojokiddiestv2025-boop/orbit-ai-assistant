@@ -1,6 +1,6 @@
 # Mine AI
 
-Mine AI 1.0 is an AI chat and voice assistant created by Joshua Fred. It uses connected AI APIs at request time for chat, voice, and image analysis. API responses are used to answer each request; this app does not train models on API responses or user conversations. Voice input uses browser speech recognition and speech synthesis for spoken replies.
+Mine AI 1.0 is an AI chat and voice assistant created by Joshua Fred. Chat and image analysis use Groq-hosted models, including an OpenAI model; voice responses use Google Gemini. These APIs process requests at runtime. This app does not train models on API responses or user conversations. Voice input uses browser speech recognition and speech synthesis for spoken replies.
 
 Image analysis is available from the plus button in the composer. Upload a PNG, JPG, or WebP image and include a question, or leave the prompt blank for a general description.
 
