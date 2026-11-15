@@ -1,8 +1,8 @@
 # Mine AI
 
-Mine AI is a Gemini inspired AI chat and voice assistant. Chat messages use Groq; voice turns use Gemini for the response, with browser speech recognition and speech synthesis for the microphone and spoken reply.
+Mine AI 1.0 is an AI chat and voice assistant created by Joshua Fred. It uses connected AI APIs at request time for chat, voice, and image analysis. API responses are used to answer each request; this app does not train models on API responses or user conversations. Voice input uses browser speech recognition and speech synthesis for spoken replies.
 
-Image analysis is available from the plus button in the composer and uses Groq's `qwen/qwen3.8-27b` vision model. Upload a PNG, JPG, or WebP image and include a question, or leave the prompt blank for a general description.
+Image analysis is available from the plus button in the composer. Upload a PNG, JPG, or WebP image and include a question, or leave the prompt blank for a general description.
 
 ## Run locally
 
@@ -22,7 +22,7 @@ The keys are read only by server-side code. Voice input requires a browser with 
 ## Deploy to Vercel
 
 1. Import the [public GitHub repository](https://github.com/jojokiddiestv2025-boop/orbit-ai-assistant) in Vercel.
-2. In the Vercel project settings, add `GROQ_API_KEY` and `GEMINI_API_KEY` under **Environment Variables** for Production (and Preview if wanted).
+2. In the Vercel project settings, add `GROQ_API_KEY` and `GEMINI_API_KEY` under **Environment Variables** for Production (and Preview if wanted). The latter is the server-side credential used by Mine AI Voice.
 3. Deploy. Vercel builds the React app with Vite into `dist/` and serves the `/api` handlers as Node.js Functions.
 4. Redeploy after changing environment variables so the new values are applied.
 

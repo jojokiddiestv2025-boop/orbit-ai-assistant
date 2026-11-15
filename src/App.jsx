@@ -76,7 +76,7 @@ export default function App() {
 
   useEffect(() => {
     fetch('/api/config').then((response) => response.json()).then((config) => {
-      setConnection(config.groq && config.gemini ? 'Models connected' : 'Add API keys to connect');
+      setConnection(config.groq && config.voice ? 'AI connected' : 'Add API keys to connect');
     }).catch(() => setConnection('Models unavailable'));
   }, []);
 
@@ -161,7 +161,7 @@ export default function App() {
       let lastImage = -1;
       context.forEach((message, index) => { if (message.image) lastImage = index; });
       const body = [
-        { role: 'system', content: fromVoice ? 'You are Mine AI, a warm, helpful voice assistant. Speak naturally and concisely.' : 'You are Mine AI, a thoughtful, clear and helpful AI assistant.' },
+        { role: 'system', content: `You are Mine AI 1.0, created by Joshua Fred. Be thoughtful, clear, and helpful. For voice replies, speak naturally and concisely. You use connected AI APIs at request time to generate answers; this app does not train models on API responses or user conversations. Never claim otherwise.` },
         ...context.map((message, index) => ({ role: message.role, content: message.content, ...(index === lastImage ? { image: message.image } : {}) })),
       ];
       const endpoint = fromVoice ? '/api/voice' : lastImage >= 0 ? '/api/vision' : '/api/chat';
@@ -231,7 +231,7 @@ export default function App() {
       <main className="main">
         <header className="topbar">
           <button className="icon-btn mobile-menu" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Open menu">☰</button>
-          <div className="model-switch"><b className="model-star">✳</b><b>Mine AI</b><span>AI assistant</span></div>
+          <div className="model-switch"><b className="model-star">✳</b><b>Mine AI 1.0</b><span>AI assistant</span></div>
           <div><button className="icon-btn" onClick={() => setDark(!dark)} title="Toggle theme" aria-label="Toggle theme">◐</button><button className="share-btn" onClick={shareApp}>↗ Share</button></div>
         </header>
         <section className="conversation" id="conversation" ref={conversationRef}>
@@ -243,8 +243,8 @@ export default function App() {
           {attachment && <div className="attachment-preview"><img src={attachment.data} alt="Selected image" /><span>{attachment.name}</span><button type="button" onClick={() => setAttachment(null)} title="Remove image">×</button></div>}
           <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(event) => pickImage(event.target.files[0])} />
           <textarea ref={inputRef} rows="1" placeholder="Ask anything" value={prompt} onChange={(event) => { setPrompt(event.target.value); event.target.style.height = 'auto'; event.target.style.height = `${Math.min(event.target.scrollHeight, 150)}px`; }} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }} />
-          <div className="composer-tools"><div><button className="tool-btn" onClick={() => fileRef.current?.click()} title="Add an image" aria-label="Add an image">＋</button><button className="mode-btn" onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}><i /><span>{mode === 'chat' ? 'Chat · Groq' : 'Voice · Gemini'}</span>⌄</button></div><div className="composer-right"><span>{mode === 'chat' ? 'Voice · Gemini' : 'Gemini voice'}</span><button className={`voice-btn ${listening ? 'listening' : ''}`} onClick={beginVoice} title="Talk to Mine AI" aria-label="Talk to Mine AI"><MicIcon /></button><button className="send-btn" onClick={() => sendMessage()} aria-label="Send" disabled={busy}><SendIcon /></button></div></div>
-        </div><div className="disclaimer">Mine AI can make mistakes. Check important information.</div></div>
+          <div className="composer-tools"><div><button className="tool-btn" onClick={() => fileRef.current?.click()} title="Add an image" aria-label="Add an image">＋</button><button className="mode-btn" onClick={() => setMode(mode === 'chat' ? 'voice' : 'chat')}><i /><span>{mode === 'chat' ? 'Chat' : 'Mine AI Voice'}</span>⌄</button></div><div className="composer-right"><span>Mine AI Voice</span><button className={`voice-btn ${listening ? 'listening' : ''}`} onClick={beginVoice} title="Talk to Mine AI" aria-label="Talk to Mine AI"><MicIcon /></button><button className="send-btn" onClick={() => sendMessage()} aria-label="Send" disabled={busy}><SendIcon /></button></div></div>
+        </div><div className="disclaimer">Mine AI 1.0 · Created by Joshua Fred · Can make mistakes; check important information.</div></div>
       </main>
       {toast && <div className="toast" role="status">{toast}</div>}
     </div>
