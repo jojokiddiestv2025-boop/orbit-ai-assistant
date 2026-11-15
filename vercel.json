@@ -1,6 +1,24 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/",
+      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Content-Type", "value": "text/html; charset=utf-8" }]
+    },
+    {
+      "source": "/assets/(.*)\\.js",
+      "headers": [{ "key": "Content-Type", "value": "text/javascript; charset=utf-8" }]
+    },
+    {
+      "source": "/assets/(.*)\\.css",
+      "headers": [{ "key": "Content-Type", "value": "text/css; charset=utf-8" }]
+    }
+  ],
   "functions": {
     "api/**/*.js": {
       "maxDuration": 60
